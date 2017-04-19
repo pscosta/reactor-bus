@@ -24,7 +24,7 @@ import reactor.core.publisher.Mono
 import reactor.core.publisher.MonoProcessor
 import reactor.core.publisher.UnicastProcessor
 import reactor.core.publisher.WorkQueueProcessor
-import reactor.test.util.FlowSerializerUtils
+import reactor.test.util.StageUtils
 import spock.lang.Specification
 
 import java.util.concurrent.CountDownLatch
@@ -243,7 +243,7 @@ class EventBusSpec extends Specification {
 
 	and: "send on 'test4'"
 	r.send 'test4', Event.wrap('anything', 'testReply4')
-	println FlowSerializerUtils.scan(r)
+	println StageUtils.scan(r)
 
 	then: "result should not be null and error called"
 	result
@@ -385,11 +385,11 @@ class EventBusSpec extends Specification {
 	def selector = anonymous()
 	int event = 0
 	def s = r.on(selector).onBackpressureBuffer().log().map { it.data }.subscribe { event = it }
-	println FlowSerializerUtils.scan(s)
+	println StageUtils.scan(s)
 
 	when: 'accept a value'
 	r.notify(selector.object, Event.wrap(1))
-	println FlowSerializerUtils.scan(s)
+	println StageUtils.scan(s)
 
 	then: 'dispatching works'
 	event == 1
@@ -403,7 +403,7 @@ class EventBusSpec extends Specification {
 	  r.notify(selector.object, Event.wrap(it))
 	}
 
-	println FlowSerializerUtils.scan(r)
+	println StageUtils.scan(r)
 
 	then:
 	tail.block().size() == 10
